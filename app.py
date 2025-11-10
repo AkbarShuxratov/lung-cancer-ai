@@ -3,6 +3,10 @@ import pandas as pd
 import joblib
 import matplotlib.pyplot as plt
 
+def map_value(x):
+    # 0 -> 1, 1 -> 5, 2 -> 9
+    return {0: 1, 1: 5, 2: 9}[x]
+
 # Modelni yuklash
 @st.cache_resource
 def load_model():
@@ -29,9 +33,9 @@ TEXTS = {
         "medical": "🩺 Medical History",
         "symptoms": "⚠️ Symptoms",
         "predict_btn": "🔮 Predict",
-        "result_low": "🟢 Predicted Risk Level: Low",
-        "result_med": "🟠 Predicted Risk Level: Medium",
-        "result_high": "🔴 Predicted Risk Level: High",
+        "result_low": "🟢 Risk Level: Low",
+        "result_med": "🟠 Risk Level: Medium",
+        "result_high": "🔴 Risk Level: High",
         "confidence": "Prediction Confidence (%)",
         "importance": "Top 10 Important Features"
     },
@@ -43,9 +47,9 @@ TEXTS = {
         "medical": "🩺 Tibbiy tarix",
         "symptoms": "⚠️ Belgilar (simptomlar)",
         "predict_btn": "🔮 Bashorat qilish",
-        "result_low": "🟢 Bashorat qilingan xavf darajasi: Past",
-        "result_med": "🟠 Bashorat qilingan xavf darajasi: O‘rta",
-        "result_high": "🔴 Bashorat qilingan xavf darajasi: Yuqori",
+        "result_low": "🟢 xavf darajasi: Past",
+        "result_med": "🟠 xavf darajasi: O‘rta",
+        "result_high": "🔴 xavf darajasi: Yuqori",
         "confidence": "Bashorat ishonchliligi (%)",
         "importance": "Eng muhim 10 ta belgi"
     }
@@ -67,31 +71,30 @@ with st.expander(T["demographics"]):
     gender = st.selectbox("Gender / Jins", [1, 2], format_func=lambda x: "Male / Erkak" if x == 1 else "Female / Ayol")
 
 with st.expander(T["lifestyle"]):
-    air_pollution = st.slider("Air Pollution / Havo ifloslanishi (1-9)", 1, 9, 5)
-    alcohol_use = st.slider("Alcohol use / Spirtli ichimlik (1-9)", 1, 9, 3)
-    dust_allergy = st.slider("Dust Allergy / Chang allergiyasi (1-9)", 1, 9, 3)
-    occupational_hazards = st.slider("Occupational Hazards / Kasbiy xavflar (1-9)", 1, 9, 3)
-    balanced_diet = st.slider("Balanced Diet / Muvozanatli ovqatlanish (1-9)", 1, 9, 3)
-    obesity = st.slider("Obesity / Semizlik (1-9)", 1, 9, 3)
-    smoking = st.slider("Smoking / Chekish (1-9)", 1, 9, 3)
-    passive_smoker = st.slider("Passive Smoker / Passiv chekuvchi (1-9)", 1, 9, 3)
-    snoring = st.slider("Snoring / Xurrak (1-9)", 1, 9, 3)
+    air_pollution = st.slider("Air Pollution / Havo ifloslanishi (0-2)", 0, 2, 1)
+    alcohol_use = st.slider("Alcohol use / Spirtli ichimlik (0-2)", 0, 2, 1)
+    dust_allergy = st.slider("Dust Allergy / Chang allergiyasi (0-2)", 0, 2, 1)
+    occupational_hazards = st.slider("Occupational Hazards / Kasbiy xavflar (0-2)", 0, 2, 1)
+    balanced_diet = st.slider("Balanced Diet / Muvozanatli ovqatlanish (0-2)", 0, 2, 1)
+    obesity = st.slider("Obesity / Semizlik (0-2)", 0, 2, 1)
+    smoking = st.slider("Smoking / Chekish (0-2)", 0, 2, 1)
+    snoring = st.slider("Snoring / Xurrak (0-2)", 0, 2, 1)
 
 with st.expander(T["medical"]):
-    genetic_risk = st.slider("Genetic Risk / Genetik xavf (1-9)", 1, 9, 3)
-    chronic_lung = st.slider("Chronic Lung Disease / Surunkali o‘pka kasalligi (1-9)", 1, 9, 3)
+    genetic_risk = st.slider("Genetic Risk / Genetik xavf (0-2)", 0, 2, 1)
+    chronic_lung = st.slider("Chronic Lung Disease / Surunkali o‘pka kasalligi (0-2)", 0, 2, 1)
 
 with st.expander(T["symptoms"]):
-    chest_pain = st.slider("Chest Pain / Ko‘krak og‘rig‘i (1-9)", 1, 9, 3)
-    coughing_blood = st.slider("Coughing of Blood / Qonli yo‘tal (1-9)", 1, 9, 3)
-    fatigue = st.slider("Fatigue / Holzizlik (1-9)", 1, 9, 3)
-    weight_loss = st.slider("Weight Loss / Vazn yo‘qotish (1-9)", 1, 9, 3)
-    shortness_breath = st.slider("Shortness of Breath / Nafas qisishi (1-9)", 1, 9, 3)
-    wheezing = st.slider("Wheezing / Hirillash (1-9)", 1, 9, 3)
-    swallowing_diff = st.slider("Swallowing Difficulty / Yutishda qiyinchilik (1-9)", 1, 9, 3)
-    clubbing = st.slider("Clubbing of Finger Nails / Tirnoq qalinlashishi (1-9)", 1, 9, 3)
-    frequent_cold = st.slider("Frequent Cold / Tez-tez shamollash (1-9)", 1, 9, 3)
-    dry_cough = st.slider("Dry Cough / Quruq yo‘tal (1-9)", 1, 9, 3)
+    chest_pain = st.slider("Chest Pain / Ko‘krak og‘rig‘i (0-2)", 0, 2, 1)
+    coughing_blood = st.slider("Coughing of Blood / Qonli yo‘tal (0-2)", 0, 2, 1)
+    fatigue = st.slider("Fatigue / Holzizlik (0-2)", 0, 2, 1)
+    weight_loss = st.slider("Weight Loss / Vazn yo‘qotish (0-2)", 0, 2, 1)
+    shortness_breath = st.slider("Shortness of Breath / Nafas qisishi (0-2)", 0, 2, 1)
+    wheezing = st.slider("Wheezing / Hirillash (0-2)", 0, 2, 1)
+    swallowing_diff = st.slider("Swallowing Difficulty / Yutishda qiyinchilik (0-2)", 0, 2, 1)
+    clubbing = st.slider("Clubbing of Finger Nails / Tirnoq qalinlashishi (0-2)", 0, 2, 1)
+    frequent_cold = st.slider("Frequent Cold / Tez-tez shamollash (0-2)", 0, 2, 1)
+    dry_cough = st.slider("Dry Cough / Quruq yo‘tal (0-2)", 0, 2, 1)
 
 # -----------------------
 # DataFrame
@@ -99,28 +102,29 @@ with st.expander(T["symptoms"]):
 input_df = pd.DataFrame([{
     "Age": age,
     "Gender": gender,
-    "Air Pollution": air_pollution,
-    "Alcohol use": alcohol_use,
-    "Dust Allergy": dust_allergy,
-    "OccuPational Hazards": occupational_hazards,
-    "Genetic Risk": genetic_risk,
-    "chronic Lung Disease": chronic_lung,
-    "Balanced Diet": balanced_diet,
-    "Obesity": obesity,
-    "Smoking": smoking,
-    "Passive Smoker": passive_smoker,
-    "Chest Pain": chest_pain,
-    "Coughing of Blood": coughing_blood,
-    "Fatigue": fatigue,
-    "Weight Loss": weight_loss,
-    "Shortness of Breath": shortness_breath,
-    "Wheezing": wheezing,
-    "Swallowing Difficulty": swallowing_diff,
-    "Clubbing of Finger Nails": clubbing,
-    "Frequent Cold": frequent_cold,
-    "Dry Cough": dry_cough,
-    "Snoring": snoring
+    "Air Pollution": map_value(air_pollution),
+    "Alcohol use": map_value(alcohol_use),
+    "Dust Allergy": map_value(dust_allergy),
+    "OccuPational Hazards": map_value(occupational_hazards),
+    "Genetic Risk": map_value(genetic_risk),
+    "chronic Lung Disease": map_value(chronic_lung),
+    "Balanced Diet": map_value(balanced_diet),
+    "Obesity": map_value(obesity),
+    "Smoking": map_value(smoking),
+    "Chest Pain": map_value(chest_pain),
+    "Coughing of Blood": map_value(coughing_blood),
+    "Fatigue": map_value(fatigue),
+    "Weight Loss": map_value(weight_loss),
+    "Shortness of Breath": map_value(shortness_breath),
+    "Wheezing": map_value(wheezing),
+    "Swallowing Difficulty": map_value(swallowing_diff),
+    "Clubbing of Finger Nails": map_value(clubbing),
+    "Frequent Cold": map_value(frequent_cold),
+    "Dry Cough": map_value(dry_cough),
+    "Snoring": map_value(snoring)
 }])
+# Passive Smoker ustuni model kutgani uchun dummy qiymat qo‘shamiz
+input_df["Passive Smoker"] = 0
 
 # -----------------------
 # Prediction
@@ -135,20 +139,3 @@ if st.button(T["predict_btn"]):
         st.warning(T["result_med"])
     else:
         st.error(T["result_high"])
-
-    st.subheader(T["confidence"])
-    prob_df = pd.DataFrame({"Level": model.classes_, "Probability": probs})
-    st.bar_chart(prob_df.set_index("Level"))
-
-    st.subheader(T["importance"])
-    clf = model.named_steps["clf"]
-    feat_names = model.named_steps["prep"].get_feature_names_out()
-    importances = clf.feature_importances_
-
-    imp_df = pd.DataFrame({"Feature": feat_names, "Importance": importances})
-    imp_df = imp_df.sort_values("Importance", ascending=False).head(10)
-
-    fig, ax = plt.subplots()
-    imp_df.plot(kind="barh", x="Feature", y="Importance", ax=ax, legend=False)
-    ax.invert_yaxis()
-    st.pyplot(fig)

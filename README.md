@@ -9,7 +9,6 @@
 
 🫁 Lung Cancer Risk Predictor
 An interactive machine learning web app built with Streamlit that predicts lung cancer risk levels (Low / Medium / High) based on patient demographics, lifestyle factors, medical history, and symptoms.
-⚠️ Disclaimer: This app is for educational and demonstration purposes only. It is not medical advice and should not be used for diagnosis or treatment.
 
 🚀 Features
 - Interactive Streamlit web app
